@@ -1,6 +1,6 @@
 # agentbrowser
 
-Easy-to-use agent memory, powered by chromadb
+Chrome for your agent.
 
 <img src="resources/image.jpg">
 
