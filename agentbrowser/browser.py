@@ -79,7 +79,6 @@ async def close_page(page_id=current_page_id):
 async def navigate_to(url, page_id=current_page_id):
     if not page_id:
         page_id = await create_page(None)
-        raise ValueError("No active page.")
     page = pages[page_id]
     try:
         await page.goto(url)
