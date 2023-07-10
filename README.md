@@ -29,6 +29,23 @@ from agentbrowser import (
 )
 ```
 
+## Quickstart
+
+```python
+from agentbrowser import (
+    navigate_to,
+    get_body_text,
+)
+
+# Navigate to a URL
+page = navigate_to("https://google.com")
+
+# Get the text from the page
+text = get_body_text(page)
+
+print(text)
+```
+
 # Basic:
 
 # Create a new page
