@@ -1,7 +1,7 @@
 """
 agentbrowser
 
-Simple agent memory, powered by chromadb
+A browser for your agent, built on Chrome and Pyppeteer.
 """
 
 __version__ = "0.1.0"
