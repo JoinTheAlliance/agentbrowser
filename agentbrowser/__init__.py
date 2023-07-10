@@ -4,7 +4,7 @@ agentbrowser
 A browser for your agent, built on Chrome and Pyppeteer.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Moon (https://github.com/lalalune)"
 __credits__ = "https://github.com/lalalune/agentbrowser"
 
