@@ -1,126 +1,187 @@
 import asyncio
+import re
 import signal
 from pyppeteer import launch
-from collections import defaultdict
-from typing import Dict
-import uuid
+import os
+import platform
 
-loop = asyncio.get_event_loop()
 browser = None
-pages: Dict[str, Dict] = defaultdict(dict)
-current_page_id = None
 
 
-def run_until_complete(future):
-    loop.run_until_complete(future)
+def get_browser():
+    check_browser_inited()
+    return browser
 
 
-def handle_interrupt():
-    asyncio.ensure_future(close_browser())
-    loop.stop()
+def init_browser(headless=True, executable_path=None):
+    if browser is not None:
+        asyncio.get_event_loop().run_until_complete(browser.close())
+
+    if executable_path is None:
+        executable_path = find_chrome()
+
+    async def init():
+        global browser
+
+        def handle_interrupt():
+            asyncio.ensure_future(browser.close())
+            asyncio.get_event_loop().stop()
+
+        browser = await launch(headless=headless, executablePath=executable_path)
+        signal.signal(signal.SIGINT, handle_interrupt)
+
+    asyncio.get_event_loop().run_until_complete(init())
 
 
-async def init_browser():
-    global browser
-    browser = await launch()
-    signal.signal(signal.SIGINT, handle_interrupt)
+def check_browser_inited():
+    if browser is None:
+        init_browser()
 
 
-loop.run_until_complete(init_browser())
-
-
-async def close_browser():
-    await browser.close()
-
-
-async def create_page(site=None):
-    global current_page_id
-    page = await browser.newPage()
-    page_id = str(uuid.uuid4())
+def create_page(site=None):
+    check_browser_inited()
+    page = asyncio.get_event_loop().run_until_complete(browser.newPage())
     if site:
-        await page.goto(site)
-    pages[page_id] = page
-    current_page_id = page_id
-    return page_id
+        asyncio.get_event_loop().run_until_complete(
+            page.goto(site, {"waitUntil": ["domcontentloaded", "networkidle0"]})
+        )
+    return page
 
 
-def get_current_page_id():
-    return current_page_id
+def close_page(page):
+    asyncio.get_event_loop().run_until_complete(page.close())
 
 
-def get_current_page():
-    return pages[current_page_id]
-
-
-def switch_to(page_id):
-    global current_page_id
-    if page_id in pages:
-        current_page_id = page_id
-    else:
-        raise ValueError(f"Page ID {page_id} does not exist.")
-
-
-async def close_page(page_id=current_page_id):
-    global current_page_id
-    if page_id in pages:
-        page = pages[page_id]
-        await page.close()
-        del pages[page_id]
-        if current_page_id == page_id:
-            if len(pages) > 0:
-                next_page_id = list(pages.keys())[0]
-            else:
-                next_page_id = None
-        current_page_id = next_page_id
-    else:
-        raise ValueError(f"Page ID {page_id} does not exist.")
-
-
-async def navigate_to(url, page_id=current_page_id):
-    if not page_id:
-        page_id = await create_page(None)
-    page = pages[page_id]
+def navigate_to(url, page):
+    check_browser_inited()
+    if not page:
+        page = create_page(None)
     try:
-        await page.goto(url)
+        asyncio.get_event_loop().run_until_complete(
+            page.goto(url, {"waitUntil": ["domcontentloaded", "networkidle0"]})
+        )
     except Exception as e:
         print("Error navigating to: " + url)
         print(e)
         return None
-    await page.goto(url)
     return page
 
 
-async def get_document_html(page_id=current_page_id):
-    if not page_id:
-        raise ValueError("No active page.")
-    page = pages[page_id]
-    return await page.content()
+def get_document_html(page):
+    return asyncio.get_event_loop().run_until_complete(page.content())
 
 
-async def get_document_text(page_id=current_page_id):
-    if not page_id:
-        raise ValueError("No active page.")
-    page = pages[page_id]
-    return await page.Jeval("document", "(element) => element.textContent")
+def get_body_text(page):
+    # get the body, but remove some junk first
+    output = asyncio.get_event_loop().run_until_complete(
+        page.Jeval(
+            "body",
+            """
+        (element) => {
+            const element_blacklist = [
+                "sidebar",
+                "footer",
+                "account",
+                "login",
+                "signup",
+                "search",
+                "advertisement",
+                "masthead",
+                "popup",
+                "floater",
+                "modal",
+            ];
+            // first, filter out all the script tags, noscript tags, <footer>, <header>, etc
+            [...element.querySelectorAll('script, noscript, form, footer, header, img, svg, style')].forEach(element => element && element.remove())
+            // find any element which contains any class or id which includes the words in the blacklist
+            const blacklist = element_blacklist.join('|')
+            const regex = new RegExp(blacklist, 'i')
+            const blacklist_elements = [...element.querySelectorAll('*')].filter(element => element && ((element.id && element.id.match(regex)) || (element.className && element.className.match && element.className.match(regex))))
+            // remove all the blacklist elements
+            blacklist_elements.forEach(element => element && element.remove())
+            // replace any tags inside of the body with just their text content
+            const tags = [...element.querySelectorAll('*')]
+            tags.forEach(element => element && element.replaceWith(element.textContent))
+
+            // then, get the text content of the body element
+            let text = element.textContent
+            // finally, remove all the extra whitespace
+            text = text.replace(/\s+/g, ' ')
+            return text
+        }
+        """,
+        )
+    )
+
+    # remove any extra whitespace
+    output = re.sub(r"\s+", " ", output)
+
+    return output
 
 
-async def get_body_text(page_id=current_page_id):
-    if not page_id:
-        raise ValueError("No active page.")
-    page = pages[page_id]
-    return await page.Jeval("body", "(element) => element.textContent")
+def get_body_text_raw(page):
+    # get the raw body text, without any filtering
+    return asyncio.get_event_loop().run_until_complete(
+        page.Jeval(
+            "body",
+            """
+        (element) => {
+            return element.textContent
+        }
+        """,
+        )
+    )
 
 
-async def get_body_html(page_id=current_page_id):
-    if not page_id:
-        raise ValueError("No active page.")
-    page = pages[page_id]
-    return await page.Jeval("body", "(element) => element.innerHTML")
+def get_body_html(page):
+    return asyncio.get_event_loop().run_until_complete(
+        page.Jeval("body", "(element) => element.innerHTML")
+    )
 
 
-async def evaluate_javascript(code, page_id=current_page_id):
-    if not page_id:
-        raise ValueError("No active page.")
+def evaluate_javascript(code, page):
+    return asyncio.get_event_loop().run_until_complete(page.evaluate(code))
+
+
+def find_chrome():
+    if platform.system() == "Windows":
+        paths = [
+            os.path.join(
+                os.environ["ProgramFiles(x86)"],
+                "Google",
+                "Chrome",
+                "Application",
+                "chrome.exe",
+            ),
+            os.path.join(
+                os.environ["ProgramFiles"],
+                "Google",
+                "Chrome",
+                "Application",
+                "chrome.exe",
+            ),
+            os.path.join(
+                os.environ["LocalAppData"],
+                "Google",
+                "Chrome",
+                "Application",
+                "chrome.exe",
+            ),
+        ]
+    elif platform.system() == "Darwin":
+        paths = ["/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"]
+    elif platform.system() == "Linux":
+        paths = [
+            "/usr/bin/google-chrome",
+            "/usr/bin/chromium",
+            "/usr/bin/chromium-browser",
+        ]
     else:
-        page = pages[page_id]
-        await page.evaluate(code)
+        print("Unsupported platform")
+        return None
+
+    for path in paths:
+        if os.path.exists(path):
+            return path
+
+    return None
