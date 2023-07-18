@@ -1,15 +1,16 @@
 import asyncio
-import re
 from pyppeteer import launch
 import os
 import platform
 
 browser = None
 
+
 def get_browser():
     if browser is None:
         init_browser()
     return browser
+
 
 async def async_get_browser():
     if browser is None:
@@ -65,13 +66,17 @@ async def async_init_browser(headless=True, executable_path=None):
         executable_path = find_chrome()
 
     if browser is None:
-        browser = await launch(headless=headless, executablePath=executable_path, autoClose=False,
-        # set handleSIGINT to False to allow for graceful shutdown
-        handleSIGINT=False,
-        handleSIGTERM=False,
-        handleSIGHUP=False
-                               )
+        browser = await launch(
+            headless=headless,
+            executablePath=executable_path,
+            autoClose=False,
+            # set handleSIGINT to False to allow for graceful shutdown
+            handleSIGINT=False,
+            handleSIGTERM=False,
+            handleSIGHUP=False,
+        )
     return browser
+
 
 # async version of create_page
 async def async_create_page(site=None):
@@ -113,6 +118,7 @@ async def async_get_document_html(page):
 async def async_get_body_text(page):
     output = await page.querySelectorEval("body", "(element) => element.innerText")
     return output.strip()
+
 
 async def async_get_body_text_raw(page):
     output = await page.querySelectorEval("body", "(element) => element.innerText")
