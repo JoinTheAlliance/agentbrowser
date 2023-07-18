@@ -1,6 +1,5 @@
 import asyncio
 import re
-import signal
 from pyppeteer import launch
 import os
 import platform
@@ -66,7 +65,12 @@ async def async_init_browser(headless=True, executable_path=None):
         executable_path = find_chrome()
 
     if browser is None:
-        browser = await launch(headless=headless, executablePath=executable_path, autoClose=False)
+        browser = await launch(headless=headless, executablePath=executable_path, autoClose=False,
+        # set handleSIGINT to False to allow for graceful shutdown
+        handleSIGINT=False,
+        handleSIGTERM=False,
+        handleSIGHUP=False
+                               )
     return browser
 
 # async version of create_page
