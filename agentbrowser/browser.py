@@ -7,59 +7,93 @@ import platform
 
 browser = None
 
-
 def get_browser():
-    check_browser_inited()
+    if browser is None:
+        init_browser()
+    return browser
+
+async def async_get_browser():
+    if browser is None:
+        await async_init_browser()
     return browser
 
 
 def init_browser(headless=True, executable_path=None):
-    if browser is not None:
-        asyncio.get_event_loop().run_until_complete(browser.close())
+    asyncio.get_event_loop().run_until_complete(
+        async_init_browser(headless, executable_path)
+    )
+
+
+def create_page(site=None):
+    return asyncio.get_event_loop().run_until_complete(async_create_page(site))
+
+
+def close_page(page):
+    asyncio.get_event_loop().run_until_complete(async_close_page(page))
+
+
+def navigate_to(url, page):
+    return asyncio.get_event_loop().run_until_complete(async_navigate_to(url, page))
+
+
+def get_document_html(page):
+    return asyncio.get_event_loop().run_until_complete(async_get_document_html(page))
+
+
+def get_body_text(page):
+    return asyncio.get_event_loop().run_until_complete(async_get_body_text(page))
+
+
+def get_body_text_raw(page):
+    return asyncio.get_event_loop().run_until_complete(async_get_body_text_raw(page))
+
+
+def get_body_html(page):
+    return asyncio.get_event_loop().run_until_complete(async_get_body_html(page))
+
+
+def evaluate_javascript(code, page):
+    return asyncio.get_event_loop().run_until_complete(
+        async_evaluate_javascript(code, page)
+    )
+
+
+# async version of init_browser
+async def async_init_browser(headless=True, executable_path=None):
+    global browser
 
     if executable_path is None:
         executable_path = find_chrome()
 
-    async def init():
-        global browser
-
-        def handle_interrupt():
-            asyncio.ensure_future(browser.close())
-            asyncio.get_event_loop().stop()
-
-        browser = await launch(headless=headless, executablePath=executable_path)
-        signal.signal(signal.SIGINT, handle_interrupt)
-
-    asyncio.get_event_loop().run_until_complete(init())
-
-
-def check_browser_inited():
     if browser is None:
-        init_browser()
+        browser = await launch(headless=headless, executablePath=executable_path, autoClose=False)
+    return browser
 
-
-def create_page(site=None):
-    check_browser_inited()
-    page = asyncio.get_event_loop().run_until_complete(browser.newPage())
+# async version of create_page
+async def async_create_page(site=None):
+    global browser
+    new_browser = None
+    if browser is None:
+        new_browser = await async_init_browser()
+    else:
+        new_browser = browser
+    page = await new_browser.newPage()
     if site:
-        asyncio.get_event_loop().run_until_complete(
-            page.goto(site, {"waitUntil": ["domcontentloaded", "networkidle0"]})
-        )
+        await page.goto(site, {"waitUntil": ["domcontentloaded", "networkidle0"]})
     return page
 
 
-def close_page(page):
-    asyncio.get_event_loop().run_until_complete(page.close())
+# async version of close_page
+async def async_close_page(page):
+    await page.close()
 
 
-def navigate_to(url, page):
-    check_browser_inited()
+# async version of navigate_to
+async def async_navigate_to(url, page):
     if not page:
-        page = create_page(None)
+        page = await async_create_page(None)
     try:
-        asyncio.get_event_loop().run_until_complete(
-            page.goto(url, {"waitUntil": ["domcontentloaded", "networkidle0"]})
-        )
+        await page.goto(url, {"waitUntil": ["domcontentloaded", "networkidle0"]})
     except Exception as e:
         print("Error navigating to: " + url)
         print(e)
@@ -67,80 +101,28 @@ def navigate_to(url, page):
     return page
 
 
-def get_document_html(page):
-    return asyncio.get_event_loop().run_until_complete(page.content())
+# async version of get_document_html
+async def async_get_document_html(page):
+    return await page.content()
 
 
-def get_body_text(page):
-    # get the body, but remove some junk first
-    output = asyncio.get_event_loop().run_until_complete(
-        page.Jeval(
-            "body",
-            """
-        (element) => {
-            const element_blacklist = [
-                "sidebar",
-                "footer",
-                "account",
-                "login",
-                "signup",
-                "search",
-                "advertisement",
-                "masthead",
-                "popup",
-                "floater",
-                "modal",
-            ];
-            // first, filter out all the script tags, noscript tags, <footer>, <header>, etc
-            [...element.querySelectorAll('script, noscript, form, footer, header, img, svg, style')].forEach(element => element && element.remove())
-            // find any element which contains any class or id which includes the words in the blacklist
-            const blacklist = element_blacklist.join('|')
-            const regex = new RegExp(blacklist, 'i')
-            const blacklist_elements = [...element.querySelectorAll('*')].filter(element => element && ((element.id && element.id.match(regex)) || (element.className && element.className.match && element.className.match(regex))))
-            // remove all the blacklist elements
-            blacklist_elements.forEach(element => element && element.remove())
-            // replace any tags inside of the body with just their text content
-            const tags = [...element.querySelectorAll('*')]
-            tags.forEach(element => element && element.replaceWith(element.textContent))
+async def async_get_body_text(page):
+    output = await page.querySelectorEval("body", "(element) => element.innerText")
+    return output.strip()
 
-            // then, get the text content of the body element
-            let text = element.textContent
-            // finally, remove all the extra whitespace
-            text = text.replace(/\s+/g, ' ')
-            return text
-        }
-        """,
-        )
-    )
-
-    # remove any extra whitespace
-    output = re.sub(r"\s+", " ", output)
-
-    return output
+async def async_get_body_text_raw(page):
+    output = await page.querySelectorEval("body", "(element) => element.innerText")
+    return output.strip()
 
 
-def get_body_text_raw(page):
-    # get the raw body text, without any filtering
-    return asyncio.get_event_loop().run_until_complete(
-        page.Jeval(
-            "body",
-            """
-        (element) => {
-            return element.textContent
-        }
-        """,
-        )
-    )
+# async version of get_body_html
+async def async_get_body_html(page):
+    return await page.Jeval("body", "(element) => element.innerHTML")
 
 
-def get_body_html(page):
-    return asyncio.get_event_loop().run_until_complete(
-        page.Jeval("body", "(element) => element.innerHTML")
-    )
-
-
-def evaluate_javascript(code, page):
-    return asyncio.get_event_loop().run_until_complete(page.evaluate(code))
+# async version of evaluate_javascript
+async def async_evaluate_javascript(code, page):
+    return await page.evaluate(code)
 
 
 def find_chrome():

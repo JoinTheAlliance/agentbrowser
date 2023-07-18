@@ -12,7 +12,6 @@ with open("README.md", "r") as fh:
 
 setup(
     name="agentbrowser",
-    version='0.1.1',
     description="A browser for your agent, built on Chrome and Pyppeteer.",
     long_description=long_description,  # added this line
     long_description_content_type="text/markdown",  # and this line
