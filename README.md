@@ -4,6 +4,10 @@ A browser for your agent, built on Chrome and Pyppeteer.
 
 <img src="resources/image.jpg">
 
+[![Lint and Test](https://github.com/AutonomousResearchGroup/agentbrowser/actions/workflows/test.yml/badge.svg)](https://github.com/AutonomousResearchGroup/agentbrowser/actions/workflows/test.yml)
+[![PyPI version](https://badge.fury.io/py/agentbrowser.svg)](https://badge.fury.io/py/agentbrowser)
+
+
 # Installation
 
 ```bash
