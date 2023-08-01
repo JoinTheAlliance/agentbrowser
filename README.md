@@ -7,7 +7,6 @@ A browser for your agent, built on Playwright.
 [![Lint and Test](https://github.com/AutonomousResearchGroup/agentbrowser/actions/workflows/test.yml/badge.svg)](https://github.com/AutonomousResearchGroup/agentbrowser/actions/workflows/test.yml)
 [![PyPI version](https://badge.fury.io/py/agentbrowser.svg)](https://badge.fury.io/py/agentbrowser)
 
-
 # Installation
 
 ```bash
@@ -49,208 +48,196 @@ text = get_body_text(page)
 print(text)
 ```
 
-# Basic:
+## API Documentation
 
-# Create a new page
+### `ensure_event_loop()`
 
-Equivalent of ctrl+t in Chrome. Makes a new blank page.
+Ensure that there is an event loop in the current thread. If no event loop exists, a new one is created and set for the current thread. This function returns the current event loop.
 
-```python
-page = create_page()
-```
-
-# Close a page
-
-Equivalent of ctrl+w in Chrome. Closes the current page.
+Example usage:
 
 ```python
-close_page(page)
+loop = ensure_event_loop()
 ```
 
-## Navigate to a URL
+### `get_browser()`
 
-Equivalent of typing a URL into the address bar and hitting enter.
-If you haven't created a page yet, it will create one for you.
+Get a Playwright browser. If the browser doesn't exist, initializes a new one.
 
-```python
-page = navigate_to("https://google.com")
-```
-
-## Get the HTML of the page
-
-Get the entire document HTML
-
-```python
-html = get_document_html(page)
-```
-
-## Get the HTML of the body
-
-Get just the HTML of the body and inner. Useful for parsing out the content of the page.
-
-```python
-html = get_body_html(page)
-```
-
-## Get the text of the body
-
-Get just the text of the body. Unlike the raw function, tries to remove some useless tags and divs and things. Not perfect, though.
-
-```python
-text = get_body_text(page)
-```
-
-
-# Advanced Usage
-
-## Get browser
-
-This will give you a reference to the browser object, which you can use for advanced stuff. The browser object comes from Playwright, so anything you can do with Playwright, you can do with this.
+Example usage:
 
 ```python
 browser = get_browser()
 ```
 
-## Evaluate Javascript
+### `init_browser(headless=True, executable_path=None)`
 
-Call some Javascript on the page. Equivalent of opening the console and typing in some Javascript.
+Initialize a new Playwright browser.
 
-```python
-result = evaluate_javascript(page, "document.title")
-```
+Parameters:
 
-## Initialize browser
+- `headless`: Whether the browser should be run in headless mode, defaults to True.
+- `executable_path`: Path to a Chromium or Chrome executable to run instead of the bundled Chromium.
 
-This will initialize the browser object. You can pass `headless` and `executable_path`. Headless will control whether the actual window appears on screen. Executable path will control which browser is used. By default, it will try to find Chrome first, then fall back to Chromium if it can't find Chrome.
-
-The browser will be auto-initialized by default so you don't need to call this. The only reason you would is because you want to use headful or swap the browser.
+Example usage:
 
 ```python
-init_browser(headless=True, executable_path="/path/to/chrome")
+init_browser(headless=False, executable_path="/usr/bin/google-chrome")
 ```
 
-# Asynchronous Usage
+### `create_page(site=None)`
 
-The library also supports asyncio and offers asynchronous versions of the methods to facilitate non-blocking operations. Here's how to use them:
+Create a new page in the browser. If a site is provided, navigate to that site.
 
-## Importing into your project
+Parameters:
+
+- `site`: URL to navigate to, defaults to None.
+
+Example usage:
 
 ```python
-from agentbrowser import (
-    async_get_browser,
-    async_init_browser,
-    async_navigate_to,
-    async_get_body_html,
-    async_get_body_text,
-    async_get_document_html,
-    async_create_page,
-    async_close_page,
-    async_evaluate_javascript,
-)
+page = create_page("https://www.example.com")
 ```
 
-## Quickstart
+### `close_page(page)`
+
+Close a page.
+
+Parameters:
+
+- `page`: The page to close.
+
+Example usage:
 
 ```python
-import asyncio
-from agentbrowser import (
-    async_navigate_to,
-    async_get_body_text,
-)
-
-async def main():
-    # Navigate to a URL
-    page = await async_navigate_to("https://google.com")
-
-    # Get the text from the page
-    text = await async_get_body_text(page)
-
-    print(text)
-
-# Run the asyncio event loop
-asyncio.run(main())
+page = create_page("https://www.example.com")
+close_page(page)
 ```
 
-# Basic:
+### `navigate_to(url, page, wait_until="domcontentloaded")`
 
-## Create a new page
+Navigate to a URL in a page.
 
-Equivalent of ctrl+t in Chrome. Makes a new blank page.
+Parameters:
+
+- `url`: The URL to navigate to.
+- `page`: The page to navigate in.
+
+Example usage:
 
 ```python
-page = await async_create_page()
+page = create_page()
+navigate_to("https://www.example.com", page)
 ```
 
-## Close a page
+### `get_document_html(page)`
 
-Equivalent of ctrl+w in Chrome. Closes the current page.
+Get the HTML content of a page.
+
+Parameters:
+
+- `page`: The page to get the HTML from.
+
+Example usage:
 
 ```python
-await async_close_page(page)
+page = create_page("https://www.example.com")
+html = get_document_html(page)
+print(html)
 ```
 
-## Navigate to a URL
+### `get_page_title(page)`
 
-Equivalent of typing a URL into the address bar and hitting enter. If you haven't created a page yet, it will create one for you.
+Get the title of a page.
+
+Parameters:
+
+- `page`: The page to get the title from.
+
+Example usage:
 
 ```python
-page = await async_navigate_to("https://google.com")
+page = create_page("https://www.example.com")
+title = get_page_title(page)
+print(title)
 ```
 
-## Get the HTML of the page
+### `get_body_text(page)`
 
-Get the entire document HTML
+Get the text content of a page's body.
+
+Parameters:
+
+- `page`: The page to get the text from.
+
+Example usage:
 
 ```python
-html = await async_get_document_html(page)
+page = create_page("https://www.example.com")
+text = get_body_text(page)
+print(text)
 ```
 
-## Get the HTML of the body
+### `get_body_html(page)`
 
-Get just the HTML of the body and inner. Useful for parsing out the content of the page.
+Get the HTML content of a page's body.
+
+Parameters:
+
+- `page`: The page to get the HTML from.
+
+Example usage:
 
 ```python
-html = await async_get_body_html(page)
+page = create_page("https://www.example.com")
+body_html = get_body_html(page)
+print(body_html)
 ```
 
-## Get the text of the body
+### `screenshot_page(page)`
 
-Get just the text of the body. Unlike the raw function, tries to remove some useless tags and divs and things. Not perfect, though.
+Get a screenshot of a page.
+
+Parameters:
+
+- `page`: The page to screenshot.
+
+Example usage:
 
 ```python
-text = await async_get_body_text(page)
+page = create_page("https://www.example.com")
+screenshot = screenshot_page(page)
+with open("screenshot.png", "wb") as f:
+    f.write(screenshot)
 ```
 
+### `evaluate_javascript(code, page)`
 
-# Advanced Usage
+Evaluate JavaScript code in a page.
 
-## Get browser
+Parameters:
 
-This will give you a reference to the browser object, which you can use for advanced stuff. The browser object comes from Playwright, so anything you can do with Playwright, you can do with this.
+- `code`: The JavaScript code to evaluate.
+- `page`: The page to evaluate the code in.
+
+Example usage:
 
 ```python
-browser = await async_get_browser()
+page = create_page("https://www.example.com")
+result = evaluate_javascript("document.title", page)
+print(result)
 ```
 
-## Evaluate Javascript
+### `find_chrome()`
 
-Call some Javascript on the page. Equivalent of opening the console and typing in some Javascript.
+Find the Chrome executable. Returns the path to the Chrome executable, or None if it could not be found.
+
+Example usage:
 
 ```python
-result = await async_evaluate_javascript(page, "document.title")
+chrome_path = find_chrome()
+print(chrome_path)
 ```
-
-## Initialize browser
-
-This will initialize the browser object. You can pass `headless` and `executable_path`. Headless will control whether the actual window appears on screen. Executable path will control which browser is used. By default, it will try to find Chrome first, then fall back to Chromium if it can't find Chrome.
-
-The browser will be auto-initialized by default so you don't need to call this. The only reason you would is because you want to use headful or swap the browser.
-
-```python
-await async_init_browser(headless=True, executable_path="/path/to/chrome")
-```
-
-Remember to use `asyncio.run(main())` to start the asynchronous event loop when using these functions.
 
 # Contributions Welcome
 
