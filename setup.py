@@ -13,7 +13,7 @@ with open("README.md", "r") as fh:
 setup(
     name="agentbrowser",
     version="0.2.0",
-    description="A browser for your agent, built on Chrome and Pyppeteer.",
+    description="A browser for your agent, built on Playwright.",
     long_description=long_description,  # added this line
     long_description_content_type="text/markdown",  # and this line
     url="https://github.com/lalalune/agentbrowser",

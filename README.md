@@ -1,6 +1,6 @@
 # agentbrowser <a href="https://discord.gg/qetWd7J9De"><img style="float: right" src="https://dcbadge.vercel.app/api/server/qetWd7J9De" alt=""></a>
 
-A browser for your agent, built on Chrome and Pyppeteer.
+A browser for your agent, built on Playwright.
 
 <img src="resources/image.jpg">
 
@@ -105,7 +105,7 @@ text = get_body_text(page)
 
 ## Get browser
 
-This will give you a reference to the browser object, which you can use for advanced stuff. The browser object comes from Pyppeteer, so anything you can do with Pyppeteer, you can do with this.
+This will give you a reference to the browser object, which you can use for advanced stuff. The browser object comes from Playwright, so anything you can do with Playwright, you can do with this.
 
 ```python
 browser = get_browser()
@@ -226,7 +226,7 @@ text = await async_get_body_text(page)
 
 ## Get browser
 
-This will give you a reference to the browser object, which you can use for advanced stuff. The browser object comes from Pyppeteer, so anything you can do with Pyppeteer, you can do with this.
+This will give you a reference to the browser object, which you can use for advanced stuff. The browser object comes from Playwright, so anything you can do with Playwright, you can do with this.
 
 ```python
 browser = await async_get_browser()
