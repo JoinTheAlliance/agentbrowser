@@ -1,8 +1,12 @@
-# agentbrowser
+# agentbrowser <a href="https://discord.gg/qetWd7J9De"><img style="float: right" src="https://dcbadge.vercel.app/api/server/qetWd7J9De" alt=""></a>
 
 A browser for your agent, built on Chrome and Pyppeteer.
 
 <img src="resources/image.jpg">
+
+[![Lint and Test](https://github.com/AutonomousResearchGroup/agentbrowser/actions/workflows/test.yml/badge.svg)](https://github.com/AutonomousResearchGroup/agentbrowser/actions/workflows/test.yml)
+[![PyPI version](https://badge.fury.io/py/agentbrowser.svg)](https://badge.fury.io/py/agentbrowser)
+
 
 # Installation
 
