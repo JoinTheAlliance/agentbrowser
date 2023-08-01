@@ -4,9 +4,24 @@ from agentbrowser import (
     get_body_html,
     get_body_text,
     get_document_html,
-    navigate_to,
+    navigate_to
 )
+from agentbrowser.browser import close_page, get_page_title, init_browser, get_browser, screenshot_page
+
 test_article = "https://test-page-to-crawl.vercel.app"
+
+
+def test_get_browser():
+    browser = get_browser()
+    assert browser is not None, "Failed to get the browser"
+    print("test_get_browser passed.")
+
+
+def test_init_browser():
+    init_browser()
+    browser = get_browser()
+    assert browser is not None, "Failed to initialize the browser"
+    print("test_init_browser passed.")
 
 
 def test_navigation():
@@ -22,6 +37,27 @@ def test_navigation():
     assert test_page.url != "https://www.google.com", "Navigation failed."
     assert test_page is not None, "Page navigation failed."
     print("test_navigation passed.")
+
+
+def test_get_page_title():
+    test_page = create_page("https://www.google.com")
+    title = get_page_title(test_page)
+    assert title == "Google", "Failed to get the correct page title."
+    print("test_get_page_title passed.")
+
+
+def test_screenshot_page():
+    test_page = create_page("https://www.google.com")
+    screenshot = screenshot_page(test_page)
+    assert screenshot is not None, "Failed to take a screenshot."
+    print("test_screenshot_page passed.")
+
+
+def test_close_page():
+    test_page = create_page("https://www.google.com")
+    close_page(test_page)
+    assert test_page.is_closed(), "Failed to close the page."
+    print("test_close_page passed.")
 
 
 def test_body_html():
