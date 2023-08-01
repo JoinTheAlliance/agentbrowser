@@ -1,1 +1,1 @@
-pyppeteer
+playwright

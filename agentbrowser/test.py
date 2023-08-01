@@ -6,8 +6,6 @@ from agentbrowser import (
     get_document_html,
     navigate_to,
 )
-from agentbrowser.browser import get_body_text_raw
-
 test_article = "https://test-page-to-crawl.vercel.app"
 
 
@@ -18,6 +16,7 @@ def test_navigation():
     navigate_to(
         "https://www.yahoo.com",
         test_page,
+        wait_until="domcontentloaded",
     )
 
     assert test_page.url != "https://www.google.com", "Navigation failed."
@@ -44,13 +43,6 @@ def test_body_text():
     body = get_body_text(test_page)
     assert body is not None, "Failed to get body text."
     print("test_body_text passed.")
-
-
-def test_body_text_raw():
-    test_page = create_page(test_article)
-    body_text_raw = get_body_text_raw(test_page)
-    assert body_text_raw is not None, "Failed to get raw body text."
-    print("test_body_text_raw passed.")
 
 
 def test_javascript_evaluation():

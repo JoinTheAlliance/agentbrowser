@@ -10,46 +10,26 @@ from agentbrowser import (
     async_create_page,
     async_close_page,
     async_evaluate_javascript,
-    async_get_body_text_raw,
 )
-from agentbrowser.browser import get_body_text_raw
+
+from agentbrowser.browser import browser, context
 
 test_article = "https://test-page-to-crawl.vercel.app"
 
-
-@pytest.fixture(scope="function")
-async def browser_fixture(request):
-    # Initialize a new event loop for this test
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    # Initialize the browser
-    await async_init_browser()
-    assert await async_get_browser() is not None, "Browser initialization failed."
-
-    async def fin():
-        # cleanup after tests
-        if await async_get_browser() is not None:
-            await (await async_get_browser()).close()
-
-        loop.run_until_complete(
-            asyncio.sleep(0.250)
-        )  # gives tasks a bit of time to finish
-
-    request.addfinalizer(fin)
-
-    yield
-
-
 @pytest.mark.asyncio
-async def test_async_create_page(browser_fixture):
+async def test_async_create_page():
+    global browser
+    global context
+    browser = None
+    context = None
+    await async_init_browser()
     test_page = await async_create_page("https://www.google.com/")
     assert test_page is not None, "Page navigation failed."
     assert test_page.url == "https://www.google.com/", "Navigation failed."
     print("test_create_page passed.")
 
     await async_close_page(test_page)
-    assert test_page.isClosed(), "Page failed to close."
+    assert test_page.is_closed(), "Page failed to close."
     print("test_close_page passed.")
 
     test_page = await async_create_page("https://www.google.com")
@@ -75,10 +55,6 @@ async def test_async_create_page(browser_fixture):
     body = await async_get_body_text(test_page)
     assert body is not None, "Failed to get body text."
     print("test_async_body_text passed.")
-
-    body_text_raw = await async_get_body_text_raw(test_page)
-    assert body_text_raw is not None, "Failed to get raw body text."
-    print("test_async_body_text_raw passed.")
 
     result = await async_evaluate_javascript(
         """

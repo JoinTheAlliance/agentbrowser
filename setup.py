@@ -12,7 +12,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name="agentbrowser",
-    version="0.1.4",
+    version="0.2.0",
     description="A browser for your agent, built on Chrome and Pyppeteer.",
     long_description=long_description,  # added this line
     long_description_content_type="text/markdown",  # and this line
@@ -21,7 +21,7 @@ setup(
     author_email="shawmakesmagic@gmail.com",
     license="MIT",
     packages=["agentbrowser"],
-    install_requires=["pyppeteer"],
+    install_requires=["playwright"],
     readme="README.md",
     classifiers=[
         "Development Status :: 2 - Pre-Alpha",

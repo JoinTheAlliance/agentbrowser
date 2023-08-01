@@ -21,7 +21,6 @@ from agentbrowser import (
     navigate_to,
     get_body_html,
     get_body_text,
-    get_body_text_raw,
     get_document_html,
     create_page,
     close_page,
@@ -97,13 +96,6 @@ Get just the text of the body. Unlike the raw function, tries to remove some use
 text = get_body_text(page)
 ```
 
-## Get the raw text of the body
-
-Get the raw text of the body. This will include all the tags and divs and things.
-
-```python
-text = get_body_text_raw(page)
-```
 
 # Advanced Usage
 
@@ -146,7 +138,6 @@ from agentbrowser import (
     async_navigate_to,
     async_get_body_html,
     async_get_body_text,
-    async_get_body_text_raw,
     async_get_document_html,
     async_create_page,
     async_close_page,
@@ -226,13 +217,6 @@ Get just the text of the body. Unlike the raw function, tries to remove some use
 text = await async_get_body_text(page)
 ```
 
-## Get the raw text of the body
-
-Get the raw text of the body. This will include all the tags and divs and things.
-
-```python
-text = await async_get_body_text_raw(page)
-```
 
 # Advanced Usage
 
