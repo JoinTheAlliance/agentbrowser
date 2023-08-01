@@ -6,7 +6,17 @@ import platform
 browser = None
 
 
+def ensure_event_loop():
+    try:
+        loop = asyncio.get_event_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+    return loop
+
+
 def get_browser():
+    ensure_event_loop()
     if browser is None:
         init_browser()
     return browser
@@ -19,46 +29,64 @@ async def async_get_browser():
 
 
 def init_browser(headless=True, executable_path=None):
+    ensure_event_loop()
     asyncio.get_event_loop().run_until_complete(
         async_init_browser(headless, executable_path)
     )
 
 
 def create_page(site=None):
+    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(async_create_page(site))
 
 
 def close_page(page):
+    ensure_event_loop()
     asyncio.get_event_loop().run_until_complete(async_close_page(page))
 
 
 def navigate_to(url, page):
+    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(async_navigate_to(url, page))
 
 
 def get_document_html(page):
+    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(async_get_document_html(page))
 
 
+def get_page_title(page):
+    ensure_event_loop()
+    return asyncio.get_event_loop().run_until_complete(async_get_page_title(page))
+
+
 def get_body_text(page):
+    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(async_get_body_text(page))
 
 
 def get_body_text_raw(page):
+    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(async_get_body_text_raw(page))
 
 
 def get_body_html(page):
+    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(async_get_body_html(page))
 
 
+def screenshot_page(page):
+    ensure_event_loop()
+    return asyncio.get_event_loop().run_until_complete(async_screenshot_page(page))
+
+
 def evaluate_javascript(code, page):
+    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(
         async_evaluate_javascript(code, page)
     )
 
 
-# async version of init_browser
 async def async_init_browser(headless=True, executable_path=None):
     global browser
 
@@ -78,7 +106,6 @@ async def async_init_browser(headless=True, executable_path=None):
     return browser
 
 
-# async version of create_page
 async def async_create_page(site=None):
     global browser
     new_browser = None
@@ -92,12 +119,10 @@ async def async_create_page(site=None):
     return page
 
 
-# async version of close_page
 async def async_close_page(page):
     await page.close()
 
 
-# async version of navigate_to
 async def async_navigate_to(url, page):
     if not page:
         page = await async_create_page(None)
@@ -110,9 +135,12 @@ async def async_navigate_to(url, page):
     return page
 
 
-# async version of get_document_html
 async def async_get_document_html(page):
     return await page.content()
+
+
+async def async_get_page_title(page):
+    return await page.evaluate("() => document.title")
 
 
 async def async_get_body_text(page):
@@ -125,12 +153,14 @@ async def async_get_body_text_raw(page):
     return output.strip()
 
 
-# async version of get_body_html
 async def async_get_body_html(page):
     return await page.Jeval("body", "(element) => element.innerHTML")
 
 
-# async version of evaluate_javascript
+async def async_screenshot_page(page):
+    return await page.screenshot()
+
+
 async def async_evaluate_javascript(code, page):
     return await page.evaluate(code)
 
