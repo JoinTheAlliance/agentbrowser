@@ -12,11 +12,11 @@ with open("README.md", "r") as fh:
 
 setup(
     name="agentbrowser",
-    version="0.2.0",
+    version="0.2.1",
     description="A browser for your agent, built on Playwright.",
     long_description=long_description,  # added this line
     long_description_content_type="text/markdown",  # and this line
-    url="https://github.com/lalalune/agentbrowser",
+    url="https://github.com/AutonomousResearchGroup/agentbrowser",
     author="Moon",
     author_email="shawmakesmagic@gmail.com",
     license="MIT",

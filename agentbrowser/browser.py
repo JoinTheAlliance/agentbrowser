@@ -96,6 +96,7 @@ def navigate_to(url, page, wait_until="domcontentloaded"):
     :return: The page after navigation.
     :rtype: playwright.async_api.Page
     """
+    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(async_navigate_to(url, page, wait_until=wait_until))
 
 
