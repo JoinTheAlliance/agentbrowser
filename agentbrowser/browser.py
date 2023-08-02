@@ -85,7 +85,7 @@ def close_page(page):
     asyncio.get_event_loop().run_until_complete(async_close_page(page))
 
 
-def navigate_to(url, page, wait_until="domcontentloaded"):
+def navigate_to(url, page, wait_until="domcontentloaded", timeout=10000):
     """
     Navigate to a URL in a page.
 
@@ -97,7 +97,7 @@ def navigate_to(url, page, wait_until="domcontentloaded"):
     :rtype: playwright.async_api.Page
     """
     ensure_event_loop()
-    return asyncio.get_event_loop().run_until_complete(async_navigate_to(url, page, wait_until=wait_until))
+    return asyncio.get_event_loop().run_until_complete(async_navigate_to(url, page, wait_until=wait_until, timeout=timeout))
 
 
 def get_document_html(page):
@@ -255,7 +255,7 @@ async def async_close_page(page):
     await page.close()
 
 
-async def async_navigate_to(url, page, wait_until="domcontentloaded"):
+async def async_navigate_to(url, page, wait_until="domcontentloaded", timeout=10000):
     """
     Navigate to a URL in a page asynchronously.
 
@@ -269,7 +269,7 @@ async def async_navigate_to(url, page, wait_until="domcontentloaded"):
     if not page:
         page = await async_create_page(None)
     try:
-        await page.goto(url, wait_until=wait_until)
+        await page.goto(url, wait_until=wait_until, timeout=timeout)
     except Exception as e:
         print("Error navigating to: " + url)
         print(e)

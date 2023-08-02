@@ -77,6 +77,7 @@ def test_document_html():
 def test_body_text():
     test_page = create_page(test_article)
     body = get_body_text(test_page)
+    print(body)
     assert body is not None, "Failed to get body text."
     print("test_body_text passed.")
 
