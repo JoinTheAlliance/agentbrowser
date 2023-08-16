@@ -8,23 +8,6 @@ browser = None
 context = None
 
 
-def ensure_event_loop():
-    """
-    Ensure that there is an event loop in the current thread.
-
-    If no event loop exists, a new one is created and set for the current thread.
-
-    :return: The current event loop.
-    :rtype: asyncio.AbstractEventLoop
-    """
-    try:
-        loop = asyncio.get_event_loop()
-    except RuntimeError:
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-    return loop
-
-
 # Synchronous functions
 
 
@@ -37,7 +20,7 @@ def get_browser():
     :return: A Playwright browser.
     :rtype: playwright.async_api.Browser
     """
-    ensure_event_loop()
+    asyncio.get_event_loop()
     global browser
     if browser is None:
         init_browser()
@@ -53,7 +36,6 @@ def init_browser(headless=True, executable_path=None):
     :param executable_path: Path to a Chromium or Chrome executable to run instead of the bundled Chromium.
     :type executable_path: str, optional
     """
-    ensure_event_loop()
     asyncio.get_event_loop().run_until_complete(
         async_init_browser(headless, executable_path)
     )
@@ -70,7 +52,6 @@ def create_page(site=None):
     :return: A new page.
     :rtype: playwright.async_api.Page
     """
-    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(async_create_page(site))
 
 
@@ -81,7 +62,6 @@ def close_page(page):
     :param page: The page to close.
     :type page: playwright.async_api.Page
     """
-    ensure_event_loop()
     asyncio.get_event_loop().run_until_complete(async_close_page(page))
 
 
@@ -96,7 +76,6 @@ def navigate_to(url, page, wait_until="domcontentloaded", timeout=10000):
     :return: The page after navigation.
     :rtype: playwright.async_api.Page
     """
-    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(async_navigate_to(url, page, wait_until=wait_until, timeout=timeout))
 
 
@@ -109,7 +88,6 @@ def get_document_html(page):
     :return: The HTML content of the page.
     :rtype: str
     """
-    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(async_get_document_html(page))
 
 
@@ -122,7 +100,6 @@ def get_page_title(page):
     :return: The title of the page.
     :rtype: str
     """
-    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(async_get_page_title(page))
 
 
@@ -135,7 +112,6 @@ def get_body_text(page):
     :return: The text content of the page's body.
     :rtype: str
     """
-    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(async_get_body_text(page))
 
 
@@ -148,7 +124,6 @@ def get_body_html(page):
     :return: The HTML content of the page's body.
     :rtype: str
     """
-    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(async_get_body_html(page))
 
 
@@ -161,7 +136,6 @@ def screenshot_page(page):
     :return: A bytes object representing the screenshot.
     :rtype: bytes
     """
-    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(async_screenshot_page(page))
 
 
@@ -175,7 +149,6 @@ def evaluate_javascript(code, page):
     :type page: playwright.async_api.Page
     :return: The result of the evaluated code.
     """
-    ensure_event_loop()
     return asyncio.get_event_loop().run_until_complete(
         async_evaluate_javascript(code, page)
     )
