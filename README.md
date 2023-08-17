@@ -50,16 +50,6 @@ print(text)
 
 ## API Documentation
 
-### `ensure_event_loop()`
-
-Ensure that there is an event loop in the current thread. If no event loop exists, a new one is created and set for the current thread. This function returns the current event loop.
-
-Example usage:
-
-```python
-loop = ensure_event_loop()
-```
-
 ### `get_browser()`
 
 Get a Playwright browser. If the browser doesn't exist, initializes a new one.
